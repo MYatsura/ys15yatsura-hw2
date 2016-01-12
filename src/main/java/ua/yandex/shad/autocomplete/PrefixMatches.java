@@ -52,20 +52,37 @@ public class PrefixMatches {
             
             @Override
             public Iterator<String> iterator() {
-                return new Iterator<String>() {
-                    private Iterator<String> trieIter = trie
-                            .wordsWithPrefix(pref).iterator();
-                    private int lens = k;
+                return new WordsIterator(pref, k);
+            }
+        };
+    }
+
+    public int size() {
+        return trie.size();
+    }
+    
+    private class WordsIterator implements Iterator<String> {
+                    
+                    private Iterator<String> trieIter;
+                    private int lens;
                     private int prevLength = -1;
+                    
+                    public WordsIterator(String pref, int k) {
+                        lens = k;
+                        trieIter = trie.wordsWithPrefix(pref).iterator();
+                    }
+                    
                     @Override
                     public boolean hasNext() {
                         return trieIter.hasNext() && lens > 0; 
                     }
+                    
                     @Override
                     public String next() throws NoSuchElementException {
                         if (!hasNext()) {
                             throw new NoSuchElementException();
-                        }      
+                        }  
+                        
                         String curWord = trieIter.next();
                         int len = curWord.length();
                         if (len > prevLength) {
@@ -73,14 +90,7 @@ public class PrefixMatches {
                             prevLength = len;
                         }
                         return curWord;
-                    }
-                }; 
-            }
-        };
-    }
-
-    public int size() {
-        return trie.size();
+                    }       
     }
     
 }
