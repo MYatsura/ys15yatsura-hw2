@@ -105,13 +105,12 @@ public class PrefixMatchesTest {
     @Test
     public void testWordsWithPrefix_String() {
         PrefixMatches prefMatches = new PrefixMatches();
-        String[] strings = { "tor", "tork", "tors", "torz", "torpo", "torps",
+        String[] strings = { "tor", "tork", "tors", "torz", 
                              "torok", "tortoi", "tompson", "totrfgf"};
         prefMatches.load(strings);
         Iterable<String> words = prefMatches.wordsWithPrefix("to");
         Iterator<String> iterator = words.iterator();
-        String[] expArray = { "tor", "tork", "tors", "torz", "torok", "torpo", 
-                              "torps"};
+        String[] expArray = { "tor", "tork", "tors", "torz", "torok"};
         int index = 0;
         boolean equalArrays = true;
         String word;
@@ -121,7 +120,7 @@ public class PrefixMatchesTest {
                 equalArrays = false;
             }
         }        
-        assertTrue(equalArrays && index == 7);         
+        assertTrue(equalArrays && index == 5);         
     }
     
     @Test

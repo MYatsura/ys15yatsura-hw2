@@ -42,90 +42,52 @@ public class PrefixMatches {
         return wordsWithPrefix(pref, DEFAULT_K);
     }
 
-    public Iterable<String> wordsWithPrefix(String pref, int k) {
-        int param = k;
-        
+    public Iterable<String> wordsWithPrefix(final String pref, final int k) {
+ 
         if (pref.length() < MIN_PREF || k < 0) {
             throw new IllegalArgumentException();
         }
         
-        Iterable<String> words = trie.wordsWithPrefix(pref);
-        Iterator<String> iterator = words.iterator();
-        String curWord = null;
-        String prevWord = null;
-        int count = 0;
-        
-        while (iterator.hasNext() && param > 0) {
-                curWord = iterator.next();
-                if (prevWord == null || curWord.length() > prevWord.length()) {
-                    param--;
-                }
+        return new Iterable<String>() {
+            
+            @Override
+            public Iterator<String> iterator() {
                 
-                prevWord = curWord;
-                count++;
-        }
-        
-        if (param == 0) {
-            while (iterator.hasNext()) {
-                curWord = iterator.next();
-                if (curWord.length() != prevWord.length()) {
-                    break;
-                }
-                prevWord = curWord;
-                count++;            
+                return new Iterator<String>() {
+
+                    Iterator<String> trieIter = trie.wordsWithPrefix(pref)
+                                                    .iterator();
+                    
+                    int lens = k;
+                    int prevLength = -1;
+                 
+                    @Override
+                    public boolean hasNext() {
+                        return trieIter.hasNext() && lens > 0; 
+                    }
+
+                    @Override
+                    public String next() throws NoSuchElementException {
+                        if (!hasNext()) {
+                            throw new NoSuchElementException();
+                        }     
+                        
+                        String curWord = trieIter.next();
+                        int len = curWord.length();
+                        if(len > prevLength) {
+                            lens--;
+                            prevLength = len;
+                        }
+                        return curWord;
+                    }
+                };
+                
             }
-        }
-        
-        WordsIterable cutWords = new WordsIterable();
-        cutWords.setIterator(new WordsIter(words.iterator(), count));
-        return cutWords;
-        
+        };
     }
 
     public int size() {
         return trie.size();
-    }
-    
-    private static class WordsIterable implements Iterable<String> {
-
-        private Iterator<String> iterator;
-        
-        @Override
-        public Iterator<String> iterator() {
-            return iterator;
-        }
-        
-        public void setIterator(Iterator<String> iter) {
-            iterator = iter;
-        }
-    }
-    
-    private static class WordsIter implements Iterator<String> {
-
-        private Iterator<String> baseIterator;
-        private int numWords;
-        private int number;
-
-        public WordsIter(Iterator<String> iterator, int num) {
-            baseIterator = iterator;
-            numWords = num;
-            number = 0;
-        }
-        
-        @Override
-        public boolean hasNext() {
-            
-            return number < numWords;
-        }
-
-        @Override
-        public String next() throws NoSuchElementException {
-            if (!hasNext()) {
-                throw new NoSuchElementException();
-            }
-            number++;
-            return baseIterator.next();
-        }
     }
     
 }

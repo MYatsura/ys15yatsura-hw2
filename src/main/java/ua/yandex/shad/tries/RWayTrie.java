@@ -51,13 +51,15 @@ public class RWayTrie implements Trie {
     }
 
     @Override
-    public Iterable<String> wordsWithPrefix(String s) {
-        
-        WordsIter iterator = bfs(new NodeWithWord(get(root, s, 0), s));
-        WordsIterable wi = new WordsIterable();
-        wi.setIterator(iterator);
-        
-        return wi;
+    public Iterable<String> wordsWithPrefix(final String pref) {
+
+        return new Iterable<String>() {
+
+            @Override
+            public Iterator<String> iterator() {
+                return new BFSIterator(pref);
+            }
+        };
     }
 
     @Override
@@ -133,38 +135,7 @@ public class RWayTrie implements Trie {
             cnt += size(x.next[indexOf(c)]);
         }
         return cnt;
-    }    
-    
-    private WordsIter bfs(NodeWithWord x) {
-        
-        WordsIter result = new WordsIter();
-        
-        if (x.node == null) {
-            return result;
-        }
-        
-        Queue<NodeWithWord> queue = new Queue<NodeWithWord>();
-        queue.enqueue(x);
-        WordsIter iterator = new WordsIter();
-        result.next = iterator;
-        
-        while (!queue.isEmpty()) {
-            NodeWithWord v = new NodeWithWord(queue.dequeue());
-            if (v.node.getValue() != EMPTY_VAL) {
-                iterator.setWord(v.word);
-                iterator.setNext(new WordsIter());
-                iterator = iterator.nextIter();
-            }
-            for (char c = 'a'; c < 'a'+R; c++) {
-                if (v.node.next[indexOf(c)] != null) {
-                    queue.enqueue(new NodeWithWord(v.node.next[indexOf(c)], 
-                                               v.word + c));
-                }
-            }
-        }
-        
-        return result;
-    }   
+    }      
     
     private static class NodeWithWord {
         private final Node node;
@@ -181,67 +152,40 @@ public class RWayTrie implements Trie {
         }
     }    
     
-    private static class WordsIterable implements Iterable<String> {
+    private class BFSIterator implements Iterator<String> {
 
-        private Iterator<String> iterator;
-        
-        @Override
-        public Iterator<String> iterator() {
-            return new WordsIter(iterator);
-        }
-        
-        public void setIterator(Iterator<String> iter) {
-            iterator = iter;
-        }
-    }
-    
-    private static class WordsIter implements Iterator<String> {
+        Queue<NodeWithWord> queue = new Queue<>();
 
-        private String word;
-        private WordsIter next;
+        public BFSIterator(String pref) {
+            Node node = get(root, pref, 0);
+            if (node != null) {
+                queue.enqueue(new NodeWithWord(node, pref));
+            }
+        }
 
-        public WordsIter() {
-            word = null;
-            next = null;
-        }
-        
-        public WordsIter(Iterator<String> iter) {
-            
-            if (iter instanceof WordsIter) {
-                WordsIter iterator = (WordsIter) iter;
-                this.next = iterator.next;
-                this.word = iterator.word;
-            }    
-        }
-        
         @Override
         public boolean hasNext() {
-            return next != null && next.word != null;
+            return !queue.isEmpty();
         }
 
         @Override
-        public String next() throws NoSuchElementException {
-            if (!hasNext()) {
-                throw new NoSuchElementException();
+        public String next() {
+
+            while (true) {
+                NodeWithWord currentNode = new NodeWithWord(queue.dequeue());
+
+                for (char c = 'a'; c < 'a' + R; c++) {
+                    if (currentNode.node.next[indexOf(c)] != null) {
+                        queue.enqueue(new NodeWithWord(currentNode.node.next[indexOf(c)],
+                                currentNode.word + c));
+                    }
+                }
+
+                if (currentNode.node.getValue() != EMPTY_VAL) {
+                    return currentNode.word;
+                }
             }
-            word = next.word;
-            next = next.next;
-            return word;
         }
-        
-        public void setWord(String w) {
-            word = w;
-        }
-        
-        public WordsIter nextIter() {
-            return next;
-  
-        }
-        
-        public void setNext(WordsIter iterator) {
-            next = iterator;
-        }
-        
     }
     
 }
