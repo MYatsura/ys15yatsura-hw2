@@ -264,6 +264,16 @@ public class PrefixMatchesTest {
         Iterable<String> words = prefMatches.wordsWithPrefix("torn", -1);
     }
     
+    @Test(expected = NoSuchElementException.class)
+    public void testWordsWithPrefix_NoElement() {
+        PrefixMatches prefMatches = new PrefixMatches();
+        String[] strings = { "tor", "tork", "tors", "torz", "torpo", "torps"};
+        prefMatches.load(strings);
+        Iterable<String> words = prefMatches.wordsWithPrefix("bo", 2);
+        Iterator<String> iterator = words.iterator();
+        String word = iterator.next();
+    }
+    
     @Test
     public void testSize_NonZeroSize() {
         when(trie.size()).thenReturn(42);

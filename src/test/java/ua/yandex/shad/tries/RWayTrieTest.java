@@ -330,6 +330,18 @@ public class RWayTrieTest {
         assertTrue(equalArrays && index == 0);
     }
     
+    @Test(expected = NoSuchElementException.class)
+    public void testWordsWithPrefix_NoElement() {
+        Tuple dogTuple = new Tuple("dog", 3);
+        Tuple spongeTuple = new Tuple("sponge", 6);
+        RWayTrie trie = new RWayTrie();
+        trie.add(dogTuple);
+        trie.add(spongeTuple);
+        Iterable<String> words = trie.wordsWithPrefix("tabu");
+        Iterator<String> iterator = words.iterator();
+        String word = iterator.next();
+    }
+    
     @Test
     public void testWordsWithPrefix_OneWord() {
         Tuple dogTuple = new Tuple("dog", 3);

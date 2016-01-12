@@ -154,7 +154,7 @@ public class RWayTrie implements Trie {
     
     private class BFSIterator implements Iterator<String> {
 
-        Queue<NodeWithWord> queue = new Queue<>();
+        private Queue<NodeWithWord> queue = new Queue<>();
 
         public BFSIterator(String pref) {
             Node node = get(root, pref, 0);
@@ -169,14 +169,19 @@ public class RWayTrie implements Trie {
         }
 
         @Override
-        public String next() {
+        public String next() throws NoSuchElementException {
 
+            if (!hasNext()) {
+                throw new NoSuchElementException();
+            }  
+            
             while (true) {
                 NodeWithWord currentNode = new NodeWithWord(queue.dequeue());
 
                 for (char c = 'a'; c < 'a' + R; c++) {
                     if (currentNode.node.next[indexOf(c)] != null) {
-                        queue.enqueue(new NodeWithWord(currentNode.node.next[indexOf(c)],
+                        queue.enqueue(new NodeWithWord(currentNode.node
+                                                       .next[indexOf(c)],
                                 currentNode.word + c));
                     }
                 }
